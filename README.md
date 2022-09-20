@@ -1,0 +1,2 @@
+# Discord_yuruBot
+Discord.pyで使用できるボタンを用いたゲームを一緒にやる人を募集できるBot
