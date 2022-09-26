@@ -21,7 +21,7 @@ f.close()
 
 class Panel(discord.ui.View):
     def __init__(self,game,time,host):
-        super().__init__(timeout=43200)
+        super().__init__(timeout=3)
         self.game=game
         self.time=time
         self.host=host
@@ -31,12 +31,6 @@ class Panel(discord.ui.View):
     def setMessage(self,status):
         return f"@everyone\n ゲーム名:{self.game}\n開始時刻:{self.time}\n一緒に遊ぶ人を募集します。\nホスト名:{self.host}\nステータス:**{status}**\nメンバー:"+",".join(self.userlist)
 
-    async def on_timeout(self) -> None:
-        self.clear_items()
-        await self.message.edit(content="募集はタイムアウトしました。",view=self)
-        self.stop()
-
-
     @discord.ui.button(label="参加する",style=discord.ButtonStyle.success)
     async def join(self,interaction:discord.Interaction,button:discord.ui.Button):
         if(interaction.user.name in self.userlist):
@@ -44,7 +38,6 @@ class Panel(discord.ui.View):
         else:
             self.userlist.append(interaction.user.name)
             await interaction.response.edit_message(content=self.setMessage(f"{interaction.user.name}さんが参加しました。"))
-
         
     @discord.ui.button(label="参加をキャンセル",style=discord.ButtonStyle.grey)
     async def cancel(self,interaction:discord.Interaction,button:discord.ui.Button):
@@ -65,6 +58,11 @@ class Panel(discord.ui.View):
             self.stop()
         else:
             await interaction.response.edit_message(content=self.setMessage(f"募集を終わらせられるのはホストのみです。"))
+    
+    async def on_timeout(self):
+        self.clear_items()
+        await self.message.edit(content="募集はタイムアウトしました。",view=self)
+        self.stop()
 
 #募集ボタン作成
 @tree.command(
