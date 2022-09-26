@@ -21,7 +21,7 @@ f.close()
 
 class Panel(discord.ui.View):
     def __init__(self,game,time,host):
-        super().__init__(timeout=3)
+        super().__init__(timeout=10800)
         self.game=game
         self.time=time
         self.host=host
