@@ -1,24 +1,20 @@
 import discord
 import discord.app_commands
 from discord.ui import Button,View
+import os
 
 #################################
 client=discord.Client(intents=discord.Intents.default())
 tree=discord.app_commands.CommandTree(client)
 #################################
 #トークン読み込み
-path="token.txt"
-f=open(path)
-TOKEN=f.read()
-f.close()
-
-#ギルドID読み込み
-path="guild_id.txt"
-f=open(path)
-GUILD_ID=f.read()
-guild=discord.Object(GUILD_ID)
-f.close()
-
+DiscordIDs="DiscordKeys/"
+with open(os.path.join(DiscordIDs,"token.txt")) as t, \
+     open(os.path.join(DiscordIDs,"guild_id.txt")) as g:
+     TOKEN=t.read()
+     GUILD_ID=g.read()
+     guild=discord.Object(GUILD_ID)
+   
 class Panel(discord.ui.View):
     def __init__(self,game,time,host,timeout=10800):
         super().__init__(timeout=timeout)
@@ -62,13 +58,21 @@ class Panel(discord.ui.View):
     async def on_timeout(self):
         self.clear_items()
         await self.message.edit(content="募集はタイムアウトしました。",view=self)
-        self.stop()
+        return await super().on_timeout()
+        
+    async def on_error(self, interaction: discord.Interaction, error: Exception):
+        await interaction.channel.send("error"+str(error))
+        return await super().on_error(interaction, error)
 
 #募集ボタン作成
 @tree.command(
     guild=guild,
     name="募集",
     description="誰かと何かしたいときに人を募集するために使えます。"
+)
+@discord.app_commands.describe(
+    ゲーム名="募集するゲーム名",
+    時間="何時から開始するか"
 )
 async def recruit(ctx:discord.Interaction,ゲーム名: str,時間:str):
     view=Panel(ゲーム名,時間,ctx.user.name)
